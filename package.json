@@ -1,0 +1,19 @@
+{
+  "name": "FueeBot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node -r @std/esm src/app.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@std/esm": "^0.26.0",
+    "discord.js": "^11.5.0",
+    "dotenv": "^8.0.0",
+    "jquery": "^3.4.1"
+  },
+  "@std/esm": "cjs"
+}

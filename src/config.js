@@ -1,0 +1,2 @@
+export const MESSAGE_TIMEOUT_SHORT = 10000;
+export const MESSAGE_TIMEOUT_MEDIUM = 20000;
