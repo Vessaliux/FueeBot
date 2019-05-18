@@ -44,11 +44,16 @@ export class Reminder {
                     case "time": {
                         if (command.length === 3) {
                             let date = this.getCurrentDateTime(guildTimezone);
-                            msg.channel.send(`Time now is: ${this.getFormattedDateString(date)} ${this.getFormattedTimeString(date)} (${this.getTimezoneOffsetString(date)})`, {code: true}).then(msg => {
-                                msg.delete(MESSAGE_TIMEOUT_MEDIUM);
-                            }).catch(e => {
-                                console.error(e);
-                            });
+                            const embed = new Discord.RichEmbed()
+                                        .setColor('#44DDFF')
+                                        .setTitle(`It's ${this.getFormattedTimeString(date)} right now!`)
+                                        .setFooter(`${date.toDateString()} (${this.getTimezoneOffsetString(date)})`);
+
+                            msg.channel.send(embed);
+
+                            if (msg.guild.me.hasPermission("MANAGE_MESSAGES")) {
+                                msg.delete();
+                            }
                         }
 
                         break;

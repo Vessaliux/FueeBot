@@ -22,4 +22,4 @@ fs.exists(dir, (exists) => {
 const client = new Discord.Client();
 new Reminder(client);
 
-client.login(process.env.BOT_TOKEN);
+client.login(process.env.BOT_TOKEN_DEV);
