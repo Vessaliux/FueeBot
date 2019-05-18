@@ -43,7 +43,7 @@ export class Reminder {
                 switch(command[2].toLowerCase()) {
                     case "time": {
                         if (command.length === 3) {
-                            date = this.getCurrentDateTime(guildTimezone);
+                            let date = this.getCurrentDateTime(guildTimezone);
                             msg.channel.send(`Time now is: ${this.getFormattedDateString(date)} ${this.getFormattedTimeString(date)} (${this.getTimezoneOffsetString(date)})`, {code: true}).then(msg => {
                                 msg.delete(MESSAGE_TIMEOUT_MEDIUM);
                             }).catch(e => {
@@ -115,7 +115,7 @@ export class Reminder {
                         break;
                     }
                     default: {
-                        if (command.length === 5) {
+                        if (command.length >= 5) {
                             let target = command[2].toLowerCase();
                             let role;
 
@@ -148,16 +148,17 @@ export class Reminder {
                             }
 
                             let author = msg.author;
-                            let date = this.getCurrentDateTime();
+                            let date = this.getCurrentDateTime(guildTimezone);
+                            let reminderMsg = command.slice(4, command.length).join(" ");
                             date.setTime(date.getTime() + ms);
-                            msg.channel.send(`I will remind @${role.name} at ${this.getFormattedDateString(date)} ${this.getFormattedTimeString(date)} (${this.getTimezoneOffsetString()}) with message: ${command[4]}`, {code: true}).then(msg => {
+                            msg.channel.send(`I will remind @${role.name} at ${this.getFormattedDateString(date)} ${this.getFormattedTimeString(date)} (${this.getTimezoneOffsetString(this.getCurrentDateTime(guildTimezone))}) with message: ${reminderMsg}`, {code: true}).then(msg => {
                                 setTimeout(() => {
                                     const embed = new Discord.RichEmbed()
                                         .setColor('#44DDFF')
                                         .setTitle(`Fuee~! This is a reminder!`)
                                         .addField('Created By', author.tag);
 
-                                    msg.channel.send(`${role} ${command[4]}`, embed);
+                                    msg.channel.send(`${role} ${reminderMsg}`, embed);
                                 }, ms);
                             }).catch(e => {
                                 console.error(e);
@@ -256,7 +257,7 @@ export class Reminder {
         }
 
         let utc = new Date(new Date().toLocaleString("en-US", {timeZone: "UTC"}));
-        let offset = (date - utc) / 1000 / 60 / 60;
+        let offset = date.getHours() - utc.getHours();
 
         if (offset === 0) {
             return "UTC"
