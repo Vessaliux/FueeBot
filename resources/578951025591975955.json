@@ -1,8 +1,10 @@
 {
   "admin": {
     "channels": {
-      "578951025591975957": true
-    }
+      "578951025591975957": true,
+      "579738333798989824": true
+    },
+    "global": true
   },
   "timezone": "Asia/Seoul"
 }

@@ -9,6 +9,38 @@ export class Admin {
         }
 
         switch (command[2].toLowerCase()) {
+            case "enableglobal":
+            case "eblglobal": {
+                const embed = new Discord.RichEmbed().setColor("#44DDFF")
+
+                if (server.data.admin.global) {
+                    embed.setDescription(`Global mode is already enabled.`);
+                } else {
+                    embed.setDescription(`Global mode has been **enabled**.`);
+                    server.data.admin.global = true;
+                    server.writeJSON();
+                }
+
+                msg.channel.send(embed);
+
+                break;
+            }
+            case "disableglobal":
+            case "dblglobal": {
+                const embed = new Discord.RichEmbed().setColor("#44DDFF")
+
+                if (!server.data.admin.global) {
+                    embed.setDescription(`Global mode is already disabled.`);
+                } else {
+                    embed.setDescription(`Global mode has been **disabled**.`);
+                    server.data.admin.global = false;
+                    server.writeJSON();
+                }
+
+                msg.channel.send(embed);
+
+                break;
+            }
             case "channels":
             case "chn": {
                 if (command.length > 3) {
@@ -17,6 +49,10 @@ export class Admin {
 
                 const embed = new Discord.RichEmbed().setColor("#44DDFF")
                 let keys = Object.keys(server.data.admin.channels);
+
+                if (server.data.admin.global) {
+                    embed.setTitle("Global mode is enabled!")
+                }
 
                 if (keys.length === 0) {
                     embed.setDescription(`No channels in the allowed list.`);
@@ -50,6 +86,11 @@ export class Admin {
                 } else if (server.guild.channels.some(chn => chn.id === channel)) {
                     server.data.admin.channels[channel] = true;
                     server.writeJSON();
+
+                    if (server.data.admin.global) {
+                        embed.setTitle("Global mode is enabled!")
+                    }
+
                     embed.setDescription(`Added **<#${channel}>** to the allowed channel list.`);
                 } else {
                     embed.setDescription(`Invalid channel.`);

@@ -25,6 +25,10 @@ export class Server {
             this.data["admin"] = {};
         }
 
+        if (!this.data.admin.hasOwnProperty("global")) {
+            this.data.admin["global"] = false;
+        }
+
         if (!this.data.admin.hasOwnProperty("channels")) {
             this.data.admin["channels"] = {};
         }
@@ -44,6 +48,10 @@ export class Server {
 
     isAdmin(msg) {
         return msg.member.hasPermission("ADMINISTRATOR") || msg.author.id === process.env.BOT_OWNER;
+    }
+
+    isAllowedChannel(msg) {
+        return this.data.admin.global || this.data.admin.channels.hasOwnProperty(msg.channel.id);
     }
 
     deleteMessage(promise, timeout = MESSAGE_TIMEOUT_SHORT) {
@@ -86,6 +94,7 @@ export class Server {
 
     onMessage(msg) {
         let command = msg.content.split(" ");
+        let deleteFlag = false;
 
         if (command[0] !== process.env.COMMAND_PREFIX) {
             return;
@@ -96,12 +105,18 @@ export class Server {
             Admin.onMessage(this, msg);
         }
         // reminder commands
-        else if (command[1] === "reminder" && this.isAdmin(msg) || this.data.admin.channels.hasOwnProperty(msg.channel.id)) {
+        else if (command[1] === "reminder" && (this.isAdmin(msg) || this.isAllowedChannel(msg))) {
             Reminder.onMessage(this, msg);
         }
         // utility commands
-        else if (this.isAdmin(msg) || this.data.admin.channels.hasOwnProperty(msg.channel.id)) {
+        else if (this.isAdmin(msg) || this.isAllowedChannel(msg)) {
             Utility.onMessage(this, msg);
+        } else {
+            deleteFlag = false;
+        }
+
+        if (deleteFlag && this.guild.me.hasPermission("MANAGE_MESSAGES")) {
+            msg.delete();
         }
     }
 }
