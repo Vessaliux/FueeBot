@@ -1,5 +1,8 @@
 import * as Discord from 'discord.js';
 
+const fs = require('fs');
+const path = require('path');
+
 export class Admin {
     static onMessage(server, msg) {
         let command = msg.content.split(" ");
@@ -9,6 +12,16 @@ export class Admin {
         }
 
         switch (command[2].toLowerCase()) {
+            case "reload": {
+                server.readJSONAsync(() => {
+                    const embed = new Discord.RichEmbed()
+                        .setColor(`#44DDFF`)
+                        .setDescription(`Successfully reloaded data.`);
+                    msg.channel.send(embed);
+                });
+
+                break;
+            }
             case "enableglobal":
             case "eblglobal": {
                 const embed = new Discord.RichEmbed().setColor("#44DDFF")

@@ -3,6 +3,7 @@ import { MESSAGE_TIMEOUT_SHORT, MESSAGE_TIMEOUT_MEDIUM } from './config';
 import { Admin } from './admin';
 import { Reminder } from './reminder';
 import { Utility } from './utility';
+import { Info } from './info';
 
 require('dotenv').config();
 const fs = require('fs');
@@ -77,6 +78,18 @@ export class Server {
         }
     }
 
+    readJSONAsync(func) {
+        fs.readFile(path.join(__dirname, "..", process.env.RESOURCE_FOLDER, `${this.guild.id}.json`), (err, data) =>  {
+            if (err && err.code !== "ENOENT") {
+                console.error(err);
+                process.exit(1);
+            }
+
+            this._data = JSON.parse(data);
+            func();
+        });
+    }
+
     writeJSON() {
         let json = JSON.stringify(this.data, null, 2);
 
@@ -111,6 +124,10 @@ export class Server {
         // utility commands
         else if (this.isAdmin(msg) || this.isAllowedChannel(msg)) {
             Utility.onMessage(this, msg);
+            
+            if (this.data.hasOwnProperty("info")) {
+                Info.onMessage(this, msg);
+            }
         } else {
             deleteFlag = false;
         }
