@@ -34,7 +34,7 @@ export class Reminder {
                         embed.setDescription("You have no reminders set.")
                     }
 
-                    msg.channel.send(embed);
+                    msg.channel.send(embed).catch(() => {});
                 }
 
                 break;
@@ -47,7 +47,7 @@ export class Reminder {
 
                     if (role === null || role === undefined) {
                         embed.setDescription(`Invalid role.`);
-                        msg.channel.send(embed);
+                        msg.channel.send(embed).catch(() => {});
 
                         return;
                     }
@@ -56,7 +56,7 @@ export class Reminder {
                     ms = Utility.timeFromString(command[4].toLowerCase());
                     if (ms === false) {
                         embed.setDescription(`Invalid time format.`);
-                        msg.channel.send(embed);
+                        msg.channel.send(embed).catch(() => {});
 
                         return;
                     }
@@ -84,7 +84,7 @@ export class Reminder {
                                 .setColor('#44DDFF')
                                 .setTitle(`Fuee~! This is a reminder!`)
                                 .addField('Created By', author.tag);
-                            msg.channel.send(`${role} ${reminder.text}`, embed);
+                            msg.channel.send(`${role} ${reminder.text}`, embed).catch(() => {});
 
                             let i = 0;
                             for (i = 0; i < ReminderData[server.guild.id][author.id].length; i++) {

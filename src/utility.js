@@ -6,7 +6,7 @@ export class Utility {
         let command = msg.content.split(" ");
 
         if (command.length === 1) {
-            msg.channel.send("https://i.imgur.com/KqoziGR.png");
+            msg.channel.send("https://i.imgur.com/KqoziGR.png").catch(() => {});
         } else {
             switch(command[1]) {
                 case "time": {
@@ -16,7 +16,7 @@ export class Utility {
                             .setColor('#44DDFF')
                             .setTitle(`It's ${Utility.formattedTimeString(date)} right now!`)
                             .setFooter(`${date.toDateString()} (${Utility.timezoneOffsetString(date)})`);
-                        msg.channel.send(embed);
+                        msg.channel.send(embed).catch(() => {});
                     }
 
                     break;
@@ -27,7 +27,7 @@ export class Utility {
                         const embed = new Discord.RichEmbed()
                             .setColor('#44DDFF')
                             .setDescription(`Current timezone is: ${server.data.timezone} (${Utility.timezoneOffsetString(date)})`);
-                        msg.channel.send(embed);
+                        msg.channel.send(embed).catch(() => {});
                     } else {
                         if (!server.isAdmin(msg)) {
                             return;
@@ -45,7 +45,7 @@ export class Utility {
                             embed.setDescription(`Invalid timezone.`);
                         }
 
-                        msg.channel.send(embed);
+                        msg.channel.send(embed).catch(() => {});
                     }
 
                     break;

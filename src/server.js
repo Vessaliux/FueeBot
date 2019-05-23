@@ -19,6 +19,7 @@ export class Server {
         this._client = client;
         this._guild = guild;
         this._data = this.readJSON();
+        this._everyoneRole = this.guild.roles.find(role => role.name === "@everyone");
 
         console.log(`Loaded data for: ${this.guild.name} (${this.guild.id})`);
 
@@ -42,6 +43,7 @@ export class Server {
     get client() {return this._client;}
     get guild() {return this._guild;}
     get data() {return this._data;}
+    get everyoneRole() {return this._everyoneRole;}
 
     /******************************************************************************************************
     * Helper
@@ -107,33 +109,34 @@ export class Server {
 
     onMessage(msg) {
         let command = msg.content.split(" ");
-        let deleteFlag = false;
+            let deleteFlag = false;
 
-        if (command[0] !== process.env.COMMAND_PREFIX) {
-            return;
-        }
-
-        // admin commands
-        if (command[1] === "admin" && this.isAdmin(msg)) {
-            Admin.onMessage(this, msg);
-        }
-        // reminder commands
-        else if (command[1] === "reminder" && (this.isAdmin(msg) || this.isAllowedChannel(msg))) {
-            Reminder.onMessage(this, msg);
-        }
-        // utility commands
-        else if (this.isAdmin(msg) || this.isAllowedChannel(msg)) {
-            Utility.onMessage(this, msg);
-            
-            if (this.data.hasOwnProperty("info")) {
-                Info.onMessage(this, msg);
+            // check for command prefix
+            if (command[0] !== process.env.COMMAND_PREFIX) {
+                return;
             }
-        } else {
-            deleteFlag = false;
-        }
 
-        if (deleteFlag && this.guild.me.hasPermission("MANAGE_MESSAGES")) {
-            msg.delete();
-        }
+            // admin commands
+            if (command[1] === "admin" && this.isAdmin(msg)) {
+                Admin.onMessage(this, msg);
+            }
+            // reminder commands
+            else if (command[1] === "reminder" && (this.isAdmin(msg) || this.isAllowedChannel(msg))) {
+                Reminder.onMessage(this, msg);
+            }
+            // utility commands
+            else if (this.isAdmin(msg) || this.isAllowedChannel(msg)) {
+                Utility.onMessage(this, msg);
+                
+                if (this.data.hasOwnProperty("info")) {
+                    Info.onMessage(this, msg);
+                }
+            } else {
+                deleteFlag = false;
+            }
+
+            if (deleteFlag && this.guild.me.hasPermission("MANAGE_MESSAGES")) {
+                msg.delete();
+            }
     }
 }

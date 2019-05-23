@@ -17,7 +17,7 @@ export class Admin {
                     const embed = new Discord.RichEmbed()
                         .setColor(`#44DDFF`)
                         .setDescription(`Successfully reloaded data.`);
-                    msg.channel.send(embed);
+                    msg.channel.send(embed).catch(() => {});
                 });
 
                 break;
@@ -34,7 +34,7 @@ export class Admin {
                     server.writeJSON();
                 }
 
-                msg.channel.send(embed);
+                msg.channel.send(embed).catch(() => {});
 
                 break;
             }
@@ -50,7 +50,7 @@ export class Admin {
                     server.writeJSON();
                 }
 
-                msg.channel.send(embed);
+                msg.channel.send(embed).catch(() => {});
 
                 break;
             }
@@ -81,7 +81,7 @@ export class Admin {
                     embed.addField("Allowed channels:", s);
                 }
 
-                msg.channel.send(embed)
+                msg.channel.send(embed).catch(() => {});
 
                 break;
             }
@@ -109,7 +109,7 @@ export class Admin {
                     embed.setDescription(`Invalid channel.`);
                 }
 
-                msg.channel.send(embed)
+                msg.channel.send(embed).catch(() => {});
 
                 break;
             }

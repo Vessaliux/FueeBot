@@ -49,6 +49,11 @@ export class Info {
                         skill = "ultimate";
                         break;
                     }
+                    case "special":
+                    case "spe": {
+                        skill = "special";
+                        break;
+                    }
                     default: {
                         return;
                     }
@@ -66,10 +71,21 @@ export class Info {
                 const embed = new Discord.RichEmbed().setColor(server.data.info[hero].color);
 
                 if (isLB) {
-                    embed.setThumbnail(server.data.info[hero][lbSkill].icon)
-                        .addField(`Name`, `[Enhanced] ${server.data.info[hero][skill].name}`, true)
-                        .addBlankField(true)
-                        .addField(`Type`, `${server.data.info[hero][skill].type}\n\u200b`, true);
+                    embed.setThumbnail(server.data.info[hero][lbSkill].icon);
+
+                    if (server.data.info[hero][lbSkill].hasOwnProperty(`name`)) {
+                        embed.addField(`Name`, `[Enhanced] ${server.data.info[hero][lbSkill].name}`, true);
+                    } else {
+                        embed.addField(`Name`, `[Enhanced] ${server.data.info[hero][skill].name}`, true)
+                    }
+
+                    if (server.data.info[hero][skill].hasOwnProperty(`cast_time`)) {
+                        embed.addField(`Cast Time`, `${server.data.info[hero][skill].cast_time}s`, true)
+                    } else {
+                        embed.addBlankField(true)
+                    }
+                    
+                    embed.addField(`Type`, `${server.data.info[hero][skill].type}\n\u200b`, true);
 
                     if (server.data.info[hero][lbSkill].hasOwnProperty(`cooldown`)) {
                         embed.addField(`Cooldown`, `${server.data.info[hero][lbSkill].cooldown}s`, true);
@@ -81,8 +97,14 @@ export class Info {
                 } else {
                     embed.setThumbnail(server.data.info[hero][skill].icon)
                         .addField(`Name`, server.data.info[hero][skill].name, true)
-                        .addBlankField(true)
-                        .addField(`Type`, `${server.data.info[hero][skill].type}\n\u200b`, true);
+                        
+                    if (server.data.info[hero][skill].hasOwnProperty(`cast_time`)) {
+                        embed.addField(`Cast Time`, `${server.data.info[hero][skill].cast_time}s`, true)
+                    } else {
+                        embed.addBlankField(true)
+                    }
+
+                    embed.addField(`Type`, `${server.data.info[hero][skill].type}\n\u200b`, true);
 
                     if (server.data.info[hero][skill].hasOwnProperty(`cooldown`)) {
                         embed.addField(`Cooldown`, `${server.data.info[hero][skill].cooldown}s`, true);
@@ -94,12 +116,12 @@ export class Info {
                 if (server.data.info[hero].hasOwnProperty(`translated_by`)) {
                     server.client.fetchUser(server.data.info[hero].translated_by).then(user => {
                         embed.setFooter(`Translated by ${user.tag}`, user.avatarURL);
-                        msg.channel.send(embed);
+                        msg.channel.send(embed).catch(() => {});
                     }).catch(err => {
                         console.error(err);
                     })
                 } else {
-                    msg.channel.send(embed);
+                    msg.channel.send(embed).catch(() => {});
                 }
             }
         }
