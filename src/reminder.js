@@ -1,272 +1,319 @@
 import * as Discord from 'discord.js';
-import { MESSAGE_TIMEOUT_SHORT, MESSAGE_TIMEOUT_MEDIUM } from './config';
-import { isNullOrUndefined, isDate } from 'util';
+import { Server } from './server';
+import { Utility } from './utility';
 
 require('dotenv').config();
-const fs = require('fs');
-const path = require('path');
-
-let Data = {};
 
 export class Reminder {
-    constructor(client) {
-        client.on("ready", () => {
-            console.log(`Logged in as ${client.user.tag}`);
+    static onMessage(server, msg) {
+        let command = msg.content.split(" ");
 
-            fs.readFile(path.join(__dirname, "..", process.env.RESOURCE_FOLDER, process.env.RESOURCE_REMINDER), (err, data) => {
-                if (err) {
-                    if (err.code === "ENOENT") {
-                        data = {}
-                    } else {
-                        console.error(err);
-                        return;
-                    }
-                } else {
-                    Data = JSON.parse(data);
-                }
-
-                console.log("Reminder data loaded.");
-            });
-        });
-        
-        client.on("message", msg => {
-            let command = msg.content.split(" ");
-            let guildTimezone = "UTC";
-
-            if (Data.hasOwnProperty("timezone")) {
-                if (Data["timezone"].hasOwnProperty(msg.guild.id)) {
-                    guildTimezone = Data["timezone"][msg.guild.id];
-                }
-            }
-
-            if (command[0].toLowerCase() === process.env.COMMAND_PREFIX && command[1].toLowerCase() === "reminder" && command.length >= 3) {
-                switch(command[2].toLowerCase()) {
-                    case "time": {
-                        if (command.length === 3) {
-                            let date = this.getCurrentDateTime(guildTimezone);
-                            msg.channel.send(`Time now is: ${this.getFormattedDateString(date)} ${this.getFormattedTimeString(date)} (${this.getTimezoneOffsetString(date)})`, {code: true}).then(msg => {
-                                msg.delete(MESSAGE_TIMEOUT_MEDIUM);
-                            }).catch(e => {
-                                console.error(e);
-                            });
-                        }
-
-                        break;
-                    }
-                    case "timezone": {
-                        if (command.length === 3) {
-                            let date = this.getCurrentDateTime(guildTimezone);
-
-                            msg.channel.send(`Current timezone is: ${guildTimezone} (${this.getTimezoneOffsetString(date)})`, {code: true}).then(msg => {
-                                msg.delete(MESSAGE_TIMEOUT_MEDIUM);
-                            }).catch(e => {
-                                console.error(e);
-                            });
-                        } else {
-                            let timezone = command.slice(3, command.length).join(" ");
-
-                            try {
-                                let date = this.getCurrentDateTime(timezone);
-                                Data["timezone"][msg.guild.id] = timezone;
-
-                                msg.channel.send(`Timezone set to ${timezone} (${this.getTimezoneOffsetString(date)})`, {code: true}).then(msg => {
-                                    msg.delete(MESSAGE_TIMEOUT_SHORT);
-                                }).catch(e => {
-                                    console.error(e);
-                                });
-
-                                fs.readFile(path.join(__dirname, "..", process.env.RESOURCE_FOLDER, process.env.RESOURCE_REMINDER), (err, data) => {
-                                    if (err) {
-                                        if (err.code === "ENOENT") {
-                                            data = {}
-                                        } else {
-                                            console.error(err);
-                                            return;
-                                        }
-                                    } else {
-                                        data = JSON.parse(data);
-                                    }
-
-                                    if (!data.hasOwnProperty("timezone")) {
-                                        data["timezone"] = {}
-                                    }
-
-                                    data["timezone"][msg.guild.id] = timezone;
-
-                                    let json = JSON.stringify(data, null, 2);
-                                    fs.writeFile(path.join(__dirname, "..", process.env.RESOURCE_FOLDER, process.env.RESOURCE_REMINDER), json, (err) => {
-                                        if (err) {
-                                            console.error(err);
-                                            return;
-                                        }
-
-                                        console.log("Timezone saved to file");
-                                    });
-                                });
-                            } catch (e) {
-                                msg.channel.send(`Incorrect timezone!`).then(msg => {
-                                    msg.delete(MESSAGE_TIMEOUT_SHORT);
-                                }).catch(e => {
-                                    console.error(e);
-                                });
-                            }
-                        }
-
-                        break;
-                    }
-                    default: {
-                        if (command.length >= 5) {
-                            let target = command[2].toLowerCase();
-                            let role;
-
-                            switch (command[2]) {
-                                default: {
-                                    role = msg.guild.roles.find(role => role.name.toLowerCase() === target);
-
-                                    break;
-                                }
-                            }
-
-                            if (isNullOrUndefined(role)) {
-                                console.error("Invalid role");
-
-                                return;
-                            }
-
-                            let ms = 0;
-                            switch (command[3]) {
-                                default: {
-                                    ms = this.getTimeFromString(command[3]);
-                                    if (ms === false) {
-                                        console.error("Invalid time format");
-
-                                        return;
-                                    }
-
-                                    break;
-                                }
-                            }
-
-                            let author = msg.author;
-                            let date = this.getCurrentDateTime(guildTimezone);
-                            let reminderMsg = command.slice(4, command.length).join(" ");
-                            date.setTime(date.getTime() + ms);
-                            msg.channel.send(`I will remind @${role.name} at ${this.getFormattedDateString(date)} ${this.getFormattedTimeString(date)} (${this.getTimezoneOffsetString(this.getCurrentDateTime(guildTimezone))}) with message: ${reminderMsg}`, {code: true}).then(msg => {
-                                setTimeout(() => {
-                                    const embed = new Discord.RichEmbed()
-                                        .setColor('#44DDFF')
-                                        .setTitle(`Fuee~! This is a reminder!`)
-                                        .addField('Created By', author.tag);
-
-                                    msg.channel.send(`${role} ${reminderMsg}`, embed);
-                                }, ms);
-                            }).catch(e => {
-                                console.error(e);
-                            });
-                        }
-
-                        break;
-                    }
-                }
-            }
-        });
-    }
-
-    getCurrentDateTime(timezone) {
-        if (isNullOrUndefined(timezone)) {
-            timezone = "UTC";
+        if (command.length < 3) {
+            return;
         }
 
-        return new Date(new Date().toLocaleString("en-US", {timeZone: timezone}));
-    }
-
-    getTimeFromString(time) {
-        if (time.match(/^\d[hms\d]*[hms]$/gi)) {
-            let symbols = "hms";
-            let result = {
-                h: 0,
-                m: 0,
-                s: 0
-            };
-
-            for (let i = 0; i < symbols.length; i++) {
-                let count = time.split(symbols[i]).length - 1;
-
-                if (count === 1) {
-                    let index = time.indexOf(symbols[i]);
-                    let s = "";
-
-                    for (let j = index - 1; j >= 0; j--) {
-                        if (Number.isNaN(parseInt(time[j], 10))) {
-                            break;
-                        } else {
-                            s = time[j] + s;
-                        }
-                    }
-
-                    result[symbols[i]] = parseInt(s, 10);
-                } else if (count > 1) {
-                    return false;
-                }
-            }
-
-            let ms = result.h*60*60*1000 + result.m*60*1000 + result.s*1000;
-
-            if (ms > 0) {
-                return ms
-            } else {
+        function getReminderEmbed() {
+            if (!server.data.reminder.hasOwnProperty(msg.author.id) || server.data.reminder[msg.author.id].length === 0) {
                 return false;
             }
-        }
 
-        return false;
-    }
+            let embed = new Discord.RichEmbed().setColor('#44DDFF');
+            let s = ``;
 
-    getFormattedTimeString(date) {
-        let hh = date.getHours();
-        let mm = date.getMinutes();
-
-        if (hh < 10) {
-            hh = `0${hh}`;
-        }
-        if (mm < 10) {
-            mm = `0${mm}`;
-        }
-
-        return `${hh}:${mm}`;
-    }
-
-    getFormattedDateString(date) {
-        let dd = date.getDate();
-        let mm = date.getMonth() + 1;
-        var yyyy = date.getFullYear();
-
-        if (dd < 10) {
-            dd = `0${dd}`;
-        } 
-        if (mm < 10) {
-            mm = `0${mm}`;
-        } 
-        
-        return `${dd}/${mm}/${yyyy}`;
-    }
-
-    getTimezoneOffsetString(date) {
-        if (!isDate(date)) {
-            return "UTC";
-        }
-
-        let utc = new Date(new Date().toLocaleString("en-US", {timeZone: "UTC"}));
-        let offset = date.getHours() - utc.getHours();
-
-        if (offset === 0) {
-            return "UTC"
-        } else {
-            if (offset > 0) {
-                return `GMT+${offset}`;
-            } else {
-                return `GMT${offset}`;
+            for (let i = 0; i < server.data.reminder[msg.author.id].length; i++) {
+                let reminder = server.data.reminder[msg.author.id][i];
+                let date = new Date(reminder.scheduledDate);
+                s += `${i + 1}) ${Utility.formattedTimeString(date)} ${Utility.formattedDateString(server, date)} *(${Utility.timezoneOffsetString(Utility.currentDateTime(server.data.timezone))})*, to ${reminder.targetString} with **${reminder.text}**\n`
             }
+
+            embed.addField(`${msg.author.tag} Reminder List`, s);
+
+            return embed;
+        }
+
+        switch(command[2].toLowerCase()) {
+            case "list": {
+                if (command.length != 3) {
+                    return;
+                }
+
+                let embed = getReminderEmbed();
+
+                if (embed === false) {
+                    embed = new Discord.RichEmbed().setColor('#44DDFF');
+                    embed.setDescription("You have no reminders set.");
+                }
+
+                msg.channel.send(embed).catch(() => {});
+
+                break;
+            }
+            case "delete": {
+                if (command.length != 3) {
+                    return;
+                }
+
+                let embed = getReminderEmbed();
+
+                if (embed === false) {
+                    embed = new Discord.RichEmbed().setColor('#44DDFF');
+                    embed.setDescription("You have no reminders set.");
+                    msg.channel.send(embed).catch(() => {});
+
+                    return;
+                }
+
+                let author = msg.author;
+                msg.channel.send("Select number to delete", embed).then(msg => {
+                    let emojiList = [];
+                    for (let i = 0; i < server.data.reminder[author.id].length; i++) {
+                        if (i > 8) {
+                            break;
+                        }
+
+                        emojiList.push(Utility.getEmoji(i + 1));
+                    }
+
+                    function reactTask() {
+                        if (emojiList.length > 0) {
+                            msg.react(emojiList.shift()).then(reactTask).catch(() => {});
+                        }
+                    }
+                    msg.react(emojiList.shift()).then(reactTask).catch(() => {});
+
+                    const filter = (reaction, user) => {
+                        let bool = false;
+
+                        for (let i = 0; i < server.data.reminder[author.id].length; i++) {
+                            if (i > 8) {
+                                break;
+                            }
+    
+                            bool = bool || reaction.emoji.name === Utility.getEmoji(i + 1);
+                        }
+
+                        return bool && user.id === author.id;
+                    }
+                    msg.awaitReactions(filter, {max: 1, time: 20000, errors: ["time"]}).then(collected => {
+                        let key = collected.keys().next().value;
+                        let index = Utility.getEmojiKey(key) - 1;
+
+                        clearTimeout(server.memoryData.reminder[author.id][index]);
+                        server.data.reminder[author.id].splice(index, 1);
+                        server.memoryData.reminder[author.id].splice(index, 1);
+                        server.writeJSON();
+
+                        embed = new Discord.RichEmbed().setColor('#44DDFF');
+                        embed.setDescription("Reminder deleted.");
+                        msg.channel.send(embed).catch(() => {});
+                        msg.delete();
+                    }).catch(collected => {
+                        msg.delete();
+                    });
+                }).catch(() => {});
+
+                break;
+            }
+            case "me": {
+                if (command.length < 5) {
+                    return;
+                }
+
+                let target = msg.author;
+
+                // check if user exists
+                if (target === null || target === undefined) {
+                    return;
+                }
+
+                let ms = 0;
+                ms = Utility.timeFromString(command[3].toLowerCase());
+                if (ms === false) {
+                    return;
+                }
+
+                let reminder = {
+                    author: {
+                        id: msg.author.id,
+                        tag: msg.author.tag,
+                        avatarURL: msg.author.avatarURL
+                    },
+                    type: "user",
+                    targets: [msg.author.id],
+                    targetString: `@${msg.author.tag}`,
+                    text: command.slice(4, command.length).join(" ")
+                }
+
+                this.sendReminder(server, msg.channel, reminder, ms);
+
+                break;
+            }
+            case "role": {
+                if (command.length < 6) {
+                    return;
+                }
+
+                let target = command[3].toLowerCase();
+                let role = server.guild.roles.find(role => role.name.toLowerCase() === target);
+
+                // check if role exists
+                if (role === null || role === undefined) {
+                    return;
+                }
+
+                let ms = 0;
+                ms = Utility.timeFromString(command[4].toLowerCase());
+                if (ms === false) {
+                    return;
+                }
+
+                let reminder = {
+                    author: {
+                        id: msg.author.id,
+                        tag: msg.author.tag,
+                        avatarURL: msg.author.avatarURL
+                    },
+                    type: "role",
+                    targets: [role.id],
+                    text: command.slice(5, command.length).join(" ")
+                }
+                reminder["targetString"] = "";
+                let roles = [role];
+                for (let role of roles) {
+                    reminder.targetString += `@${role.name}, `;
+                }
+                reminder.targetString = reminder.targetString.slice(0, -2);
+
+                this.sendReminder(server, msg.channel, reminder, ms);
+
+                break;
+            }
+        }
+    }
+
+    /**
+     * @param {Server} server
+     * @param {Discord.TextChannel} channel
+     * @param {Object} reminder,
+     * @param {Number} ms,
+     * @param {Boolean} toWrite
+     */
+    static sendReminder(server, channel, reminder, ms, toWrite = true) {
+        let author = reminder.author;
+        let date = Utility.currentDateTime(server.data.timezone);
+        let time = date.getTime() + ms;
+        date.setTime(time);
+
+        reminder["timestamp"] = new Date().getTime();
+        reminder["channel"] = channel.id;
+        reminder["scheduledDate"] = date;
+        reminder["scheduledTime"] = reminder.timestamp + ms;
+
+        if (!server.data.reminder.hasOwnProperty(author.id)) {
+            server.data.reminder[author.id] = [];
+        }
+
+        if (!server.memoryData.reminder.hasOwnProperty(author.id)) {
+            server.memoryData.reminder[author.id] = [];
+        }
+
+        function task() {
+            let timer = setTimeout(() => {
+                const embed = new Discord.RichEmbed()
+                    .setColor('#44DDFF')
+                    .addField("Fuee~! This is a reminder!", reminder.text)
+                    .setFooter(`Created by ${author.tag}`, author.avatarURL);
+                let targetText = "";
+                
+                for (let target of reminder.targets) {
+                    let targetObj;
+                    switch (reminder.type) {
+                        case "role": {
+                            targetObj = server.guild.roles.get(target);
+
+                            break;
+                        }
+                        default: {
+                            targetObj = server.guild.members.get(target).user;
+
+                            break;
+                        }
+                    }
+
+                    targetText += `${targetObj} `;
+                }
+
+                channel.send(targetText, embed).catch(() => {});
+
+                let i = 0;
+                for (i = 0; i < server.data.reminder[author.id].length; i++) {
+                    let currReminder = server.data.reminder[author.id][i];
+
+                    if (reminder.timestamp === currReminder.timestamp) {
+                        break;
+                    }
+                }
+
+                server.data.reminder[author.id].splice(i, 1);
+                server.memoryData.reminder[author.id].splice(i, 1);
+                server.writeJSON();
+            }, ms);
+
+            if (toWrite) {
+                if (server.data.reminder[author.id].length === 0) {
+                    server.data.reminder[author.id].push(reminder);
+                    server.memoryData.reminder[author.id].push(timer);
+                } else {
+                    let index;
+    
+                    for (index = 0; index < server.data.reminder[author.id].length; index++) {
+                        let currReminder = server.data.reminder[author.id][index];
+    
+                        if (reminder.scheduledTime === currReminder.scheduledTime) {
+                            if (reminder.timestamp <= currReminder.timestamp) {
+                                break;
+                            }
+                        } else if (reminder.scheduledTime < currReminder.scheduledTime) {
+                            break;
+                        }
+                    }
+    
+                    server.data.reminder[author.id].splice(index, 0, reminder);
+                    server.memoryData.reminder[author.id].splice(index, 0, timer);
+                }
+    
+                server.writeJSON();
+            } else {
+                server.memoryData.reminder[author.id].push(timer);
+            }
+        }
+
+        if (toWrite) {
+            const embed = new Discord.RichEmbed()
+            .setColor('#44DDFF')
+            .addField("Recipient", reminder.targetString, true)
+            .addField("Type", reminder.type.toProperCase(), true)
+            .addField("Remind At", `${Utility.formattedTimeString(reminder.scheduledDate)} ${Utility.formattedDateString(server, reminder.scheduledDate)} *(${Utility.timezoneOffsetString(Utility.currentDateTime(server.data.timezone))})*`)
+            .addField("Message", reminder.text)
+            .setFooter(`Created by ${author.tag}`, author.avatarURL);
+            channel.send("Fuee~! Reminder created!", embed).then(task).catch(() => {});
+        } else {
+            task();
+        }
+    }
+
+    /**
+     * @param {Server} server
+     * @param {Object} reminder,
+     * @param {Number} ms
+     */
+    static reformReminder(server, reminder, ms) {
+        let channel = server.guild.channels.get(reminder.channel);
+
+        if (channel) {
+            Reminder.sendReminder(server, channel, reminder, ms, false);
+        } else {
+            console.error("Reminder.reformReminder: Invalid channel id");
         }
     }
 }
