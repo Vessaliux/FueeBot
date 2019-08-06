@@ -7,6 +7,16 @@ const path = require('path');
 const client = new Discord.Client();
 
 /******************************************************************************************************
+* Prototypes
+******************************************************************************************************/
+
+String.prototype.toProperCase = function () {
+    return this.toLowerCase().replace(/(?:^|[\s-/])\w/g, function (match) {
+        return match.toUpperCase();
+    });
+}
+
+/******************************************************************************************************
 * Data Initialization
 ******************************************************************************************************/
 
@@ -41,6 +51,8 @@ client.on("ready", () => {
         ServerMap.set(guild, new Server(client, guild));
     }
     console.log("All data loaded.\n");
+
+    client.user.setActivity("Fuee~");
 });
 
 // message by any user
@@ -48,6 +60,14 @@ client.on("message", msg => {
     // in a server
     if (ServerMap.has(msg.guild)) {
         ServerMap.get(msg.guild).onMessage(msg);
+    }
+});
+
+// joins a new guild
+client.on("guildCreate", guild => {
+    // not in the server previously
+    if (!ServerMap.has(guild)) {
+        ServerMap.set(guild, new Server(client, guild));
     }
 });
 

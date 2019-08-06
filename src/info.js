@@ -1,8 +1,15 @@
 import * as Discord from 'discord.js';
+import { Server } from './server';
 
 export class Info {
     static onMessage(server, msg) {
         let command = msg.content.split(" ");
+
+        if (command.length >= 2 && command[1].toLowerCase() === "uno") {
+            let arr = ["<:Jebaited:302181297349197824>", "<:RufusLaugh:443290739787563008>", "<:Mari:440765691289665537>"]
+
+            msg.channel.send(arr[Math.floor(Math.random() * arr.length)]).catch(() => {});
+        }
 
         if (command.length < 3) {
             return;
@@ -10,8 +17,8 @@ export class Info {
 
         if (command.length <= 4) {
             let hero = command[1].toLowerCase();
-            
-            if (command.length >= 3 && server.data.info.hasOwnProperty(hero)) {
+
+            if (command.length >= 3 && Server.SharedData.info.gck.hasOwnProperty(hero)) {
                 let skill = command[2].toLowerCase();
                 let isLB = false;
 
@@ -59,69 +66,79 @@ export class Info {
                     }
                 }
 
-                if (!server.data.info[hero].hasOwnProperty(skill)) {
+                if (!Server.SharedData.info.gck[hero].hasOwnProperty(skill)) {
                     return;
                 }
 
                 let lbSkill = `lb_${skill}`;
-                if (isLB && !server.data.info[hero].hasOwnProperty(lbSkill)) {
+                if (isLB && !Server.SharedData.info.gck[hero].hasOwnProperty(lbSkill)) {
                     return;
                 }
-
-                const embed = new Discord.RichEmbed().setColor(server.data.info[hero].color);
+                
+                const embed = new Discord.RichEmbed().setColor(Server.SharedData.info.gck[hero].color);
 
                 if (isLB) {
-                    embed.setThumbnail(server.data.info[hero][lbSkill].icon);
+                    embed.setThumbnail(Server.SharedData.info.gck[hero][lbSkill].icon);
 
-                    if (server.data.info[hero][lbSkill].hasOwnProperty(`name`)) {
-                        embed.addField(`Name`, `[Enhanced] ${server.data.info[hero][lbSkill].name}`, true);
+                    if (Server.SharedData.info.gck[hero][lbSkill].hasOwnProperty(`name`)) {
+                        embed.addField(`Name`, `**[Enhanced] ${Server.SharedData.info.gck[hero][lbSkill].name}**`, true);
                     } else {
-                        embed.addField(`Name`, `[Enhanced] ${server.data.info[hero][skill].name}`, true)
+                        embed.addField(`Name`, `**[Enhanced] ${Server.SharedData.info.gck[hero][skill].name}**`, true)
                     }
 
-                    if (server.data.info[hero][skill].hasOwnProperty(`cast_time`)) {
-                        embed.addField(`Cast Time`, `${server.data.info[hero][skill].cast_time}s`, true)
+                    if (Server.SharedData.info.gck[hero][skill].hasOwnProperty(`cast_time`)) {
+                        embed.addField(`Cast Time`, `${Server.SharedData.info.gck[hero][skill].cast_time}s`, true)
                     } else {
                         embed.addBlankField(true)
                     }
                     
-                    embed.addField(`Type`, `${server.data.info[hero][skill].type}\n\u200b`, true);
+                    embed.addField(`Type`, `${Server.SharedData.info.gck[hero][skill].type}\n\u200b`, true);
 
-                    if (server.data.info[hero][lbSkill].hasOwnProperty(`cooldown`)) {
-                        embed.addField(`Cooldown`, `${server.data.info[hero][lbSkill].cooldown}s`, true);
-                    } else if (server.data.info[hero][skill].hasOwnProperty(`cooldown`)) {
-                        embed.addField(`Cooldown`, `${server.data.info[hero][skill].cooldown}s`, true);
+                    if (Server.SharedData.info.gck[hero][lbSkill].hasOwnProperty(`cooldown`)) {
+                        embed.addField(`Cooldown`, `${Server.SharedData.info.gck[hero][lbSkill].cooldown}s`, true);
+                    } else if (Server.SharedData.info.gck[hero][skill].hasOwnProperty(`cooldown`)) {
+                        embed.addField(`Cooldown`, `${Server.SharedData.info.gck[hero][skill].cooldown}s`, true);
                     }
 
-                    embed.addField(`Description`, server.data.info[hero][lbSkill].description);
+                    embed.addField(`Description`, Server.SharedData.info.gck[hero][lbSkill].description);
                 } else {
-                    embed.setThumbnail(server.data.info[hero][skill].icon)
-                        .addField(`Name`, server.data.info[hero][skill].name, true)
+                    embed.setThumbnail(Server.SharedData.info.gck[hero][skill].icon)
+                        .addField(`Name`, `**${Server.SharedData.info.gck[hero][skill].name}**`, true)
                         
-                    if (server.data.info[hero][skill].hasOwnProperty(`cast_time`)) {
-                        embed.addField(`Cast Time`, `${server.data.info[hero][skill].cast_time}s`, true)
+                    if (Server.SharedData.info.gck[hero][skill].hasOwnProperty(`cast_time`)) {
+                        embed.addField(`Cast Time`, `${Server.SharedData.info.gck[hero][skill].cast_time}s`, true)
                     } else {
                         embed.addBlankField(true)
                     }
 
-                    embed.addField(`Type`, `${server.data.info[hero][skill].type}\n\u200b`, true);
+                    embed.addField(`Type`, `${Server.SharedData.info.gck[hero][skill].type}\n\u200b`, true);
 
-                    if (server.data.info[hero][skill].hasOwnProperty(`cooldown`)) {
-                        embed.addField(`Cooldown`, `${server.data.info[hero][skill].cooldown}s`, true);
+                    if (Server.SharedData.info.gck[hero][skill].hasOwnProperty(`cooldown`)) {
+                        embed.addField(`Cooldown`, `${Server.SharedData.info.gck[hero][skill].cooldown}s`, true);
                     }
 
-                    embed.addField(`Description`, server.data.info[hero][skill].description);
+                    embed.addField(`Description`, Server.SharedData.info.gck[hero][skill].description);
                 }
 
-                if (server.data.info[hero].hasOwnProperty(`translated_by`)) {
-                    server.client.fetchUser(server.data.info[hero].translated_by).then(user => {
+                let translatedById = null;
+
+                if (isLB && Server.SharedData.info.gck[hero][lbSkill].hasOwnProperty("translated_by")) {
+                    translatedById = Server.SharedData.info.gck[hero][lbSkill].translated_by;
+                } else if (!isLB && Server.SharedData.info.gck[hero][skill].hasOwnProperty("translated_by")) {
+                    translatedById = Server.SharedData.info.gck[hero][skill].translated_by;
+                } else if (Server.SharedData.info.gck[hero].hasOwnProperty(`translated_by`)) {
+                    translatedById = Server.SharedData.info.gck[hero].translated_by;
+                }
+
+                if (translatedById === null) {
+                    msg.channel.send(embed).catch(() => {});
+                } else {
+                    server.client.fetchUser(translatedById).then(user => {
                         embed.setFooter(`Translated by ${user.tag}`, user.avatarURL);
                         msg.channel.send(embed).catch(() => {});
                     }).catch(err => {
                         console.error(err);
                     })
-                } else {
-                    msg.channel.send(embed).catch(() => {});
                 }
             }
         }

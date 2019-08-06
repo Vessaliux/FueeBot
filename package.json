@@ -4,16 +4,15 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node -r @std/esm src/app.mjs"
+    "start": "node -r esm src/app.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@std/esm": "^0.26.0",
     "discord.js": "^11.5.0",
     "dotenv": "^8.0.0",
+    "esm": "^3.2.25",
     "jquery": "^3.4.1"
-  },
-  "@std/esm": "cjs"
+  }
 }
