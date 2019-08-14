@@ -1,6 +1,8 @@
 require('dotenv').config();
-import * as Discord from 'discord.js';
+import Discord from 'discord.js';
 import { Server } from './server';
+import { Utility } from './utility';
+import { Info } from './info';
 
 const fs = require('fs');
 const path = require('path');
@@ -57,10 +59,23 @@ client.on("ready", () => {
 
 // message by any user
 client.on("message", msg => {
-    // in a server
-    if (ServerMap.has(msg.guild)) {
-        ServerMap.get(msg.guild).onMessage(msg);
+    switch (msg.channel.type) {
+        // is a DM
+        case 'dm':
+            if (Server.SharedData.hasOwnProperty("info")) {
+                Info.onMessage(client, msg);
+            }
+
+            break;
+        // in a server text channel
+        case 'text':
+            if (ServerMap.has(msg.guild)) {
+                ServerMap.get(msg.guild).onMessage(msg);
+            }
+            break;
     }
+
+
 });
 
 // joins a new guild
@@ -71,4 +86,5 @@ client.on("guildCreate", guild => {
     }
 });
 
-client.login(process.env.BOT_TOKEN_DEV);
+//client.login(process.env.BOT_TOKEN_DEV);
+client.login(process.env.BOT_TOKEN);

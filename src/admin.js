@@ -1,9 +1,14 @@
-import * as Discord from 'discord.js';
+import Discord from 'discord.js';
+import { Server } from './server';
 
 const fs = require('fs');
 const path = require('path');
 
 export class Admin {
+    /**
+     * @param {Server} server
+     * @param {Discord.Message} msg
+     */
     static onMessage(server, msg) {
         let command = msg.content.split(" ");
 
@@ -17,7 +22,7 @@ export class Admin {
                     const embed = new Discord.RichEmbed()
                         .setColor(`#44DDFF`)
                         .setDescription(`Successfully reloaded data.`);
-                    msg.channel.send(embed).catch(() => {});
+                    msg.channel.send(embed).catch(() => { });
                 });
 
                 break;
@@ -34,7 +39,7 @@ export class Admin {
                     server.writeJSON();
                 }
 
-                msg.channel.send(embed).catch(() => {});
+                msg.channel.send(embed).catch(() => { });
 
                 break;
             }
@@ -50,7 +55,7 @@ export class Admin {
                     server.writeJSON();
                 }
 
-                msg.channel.send(embed).catch(() => {});
+                msg.channel.send(embed).catch(() => { });
 
                 break;
             }
@@ -81,7 +86,7 @@ export class Admin {
                     embed.addField("Allowed channels:", s);
                 }
 
-                msg.channel.send(embed).catch(() => {});
+                msg.channel.send(embed).catch(() => { });
 
                 break;
             }
@@ -90,7 +95,7 @@ export class Admin {
                 if (command.length < 4) {
                     return;
                 }
-                
+
                 const embed = new Discord.RichEmbed().setColor("#44DDFF")
                 let channel = command.slice(3, command.length).join(" ").replace(/<|#|>/g, "");
 
@@ -109,7 +114,7 @@ export class Admin {
                     embed.setDescription(`Invalid channel.`);
                 }
 
-                msg.channel.send(embed).catch(() => {});
+                msg.channel.send(embed).catch(() => { });
 
                 break;
             }
