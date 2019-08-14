@@ -14,7 +14,7 @@ const Emojis = {
     9: "9⃣"
 }
 
-/*const COOLDOWN = 5 * 60;
+const COOLDOWN = 5 * 60;
 const BACKFIRE_DURATION = 60;
 let SnapCooldown = {};
 setInterval(() => {
@@ -25,7 +25,7 @@ setInterval(() => {
             SnapCooldown[id] = 0
         }
     }
-}, 1000);*/
+}, 1000);
 
 export class Utility {
     /**
@@ -36,16 +36,16 @@ export class Utility {
         let command = msg.content.split(" ");
 
         if (command.length === 1) {
-            msg.channel.send(Server.SharedData.utility.fuee[Math.floor(Math.random() * Server.SharedData.utility.fuee.length)]).catch(() => {});
+            msg.channel.send(Server.SharedData.utility.fuee[Math.floor(Math.random() * Server.SharedData.utility.fuee.length)]).catch(() => { });
         } else {
-            switch(command[1].toLowerCase()) {
-                /*case "snap": {
+            switch (command[1].toLowerCase()) {
+                case "snap": {
                     if (command.length === 2 && server.guild.id === "81392063312044032") {
                         let member = server.guild.members.get("215081584955621376"); // Omen
                         let role = server.guild.roles.find(role => role.name === "Thanos Snapped");
 
                         if (member.roles.has(role.id)) {
-                            msg.channel.send(`<:Bruh:562338181316608020> **${member.displayName}** is already snapped.`).catch(() => {});
+                            msg.channel.send(`<:Bruh:562338181316608020> **${member.displayName}** is already snapped.`).catch(() => { });
 
                             return;
                         }
@@ -61,7 +61,7 @@ export class Utility {
                                 const embed = new Discord.RichEmbed()
                                     .setColor('#44DDFF')
                                     .setDescription(`Chill **${msg.member.displayName}**. You still need to wait ${SnapCooldown[msg.author.id]} seconds.`);
-                                msg.channel.send(embed).catch(() => {});
+                                msg.channel.send(embed).catch(() => { });
 
                                 return;
                             }
@@ -83,8 +83,8 @@ export class Utility {
                                         setTimeout(() => {
                                             member.removeRole(role);
                                         }, seconds * 1000);
-                                    }).catch(() => {});
-                                }).catch(() => {});
+                                    }).catch(() => { });
+                                }).catch(() => { });
                             } else if (random <= backfire) {
                                 msg.member.addRole(role).then(() => {
                                     const embed = new Discord.RichEmbed()
@@ -94,23 +94,23 @@ export class Utility {
                                         setTimeout(() => {
                                             msg.member.removeRole(role);
                                         }, BACKFIRE_DURATION * 1000);
-                                    }).catch(() => {});
-                                }).catch(() => {});
+                                    }).catch(() => { });
+                                }).catch(() => { });
                             } else {
                                 const embed = new Discord.RichEmbed()
                                     .setColor('#44DDFF')
                                     .setDescription(`**${member.displayName}** is safe... for now.`);
-                                msg.channel.send(text, embed).catch(() => {});
+                                msg.channel.send(text, embed).catch(() => { });
                             }
                         }
                     }
 
                     break;
-                }*/
-                case "hakanai": 
+                }
+                case "hakanai":
                 case "fleeting": {
                     if (command.length === 2) {
-                        msg.channel.send(Server.SharedData.utility.fleeting[Math.floor(Math.random() * Server.SharedData.utility.fleeting.length)]).catch(() => {});
+                        msg.channel.send(Server.SharedData.utility.fleeting[Math.floor(Math.random() * Server.SharedData.utility.fleeting.length)]).catch(() => { });
                     }
 
                     break;
@@ -118,10 +118,10 @@ export class Utility {
                 case "4town": {
                     if (command.length === 2) {
                         msg.channel.send({
-                             files: [{
+                            files: [{
                                 attachment: './shared_resources/4Town.png',
-                             }]
-                          }).catch(() => {});
+                            }]
+                        }).catch(() => { });
                     }
 
                     break;
@@ -134,14 +134,14 @@ export class Utility {
                         const embed = new Discord.RichEmbed()
                             .setColor('#00ff7f')
                             .setThumbnail(`https://i.imgur.com/RhxmQdA.png`);
-                        msg.channel.send("Fuee! This is the link to Aikeva's spreadsheet: https://aikeva.page.link/GCKss", embed).catch(() => {});
+                        msg.channel.send("Fuee! This is the link to Aikeva's spreadsheet: https://aikeva.page.link/GCKss", embed).catch(() => { });
                     }
 
                     break;
                 }
                 case "blame":
                     if (command.length === 2) {
-                        msg.channel.send(Server.SharedData.utility.blame[Math.floor(Math.random() * Server.SharedData.utility.blame.length)]).catch(() => {});
+                        msg.channel.send(Server.SharedData.utility.blame[Math.floor(Math.random() * Server.SharedData.utility.blame.length)]).catch(() => { });
                     }
 
                     break;
@@ -152,7 +152,7 @@ export class Utility {
                             .setColor('#44DDFF')
                             .setTitle(`It's ${Utility.formattedTimeString(date)} right now!`)
                             .setFooter(`${date.toDateString()} (${Utility.timezoneOffsetString(date)})`);
-                        msg.channel.send(embed).catch(() => {});
+                        msg.channel.send(embed).catch(() => { });
                     }
 
                     break;
@@ -163,7 +163,7 @@ export class Utility {
                         const embed = new Discord.RichEmbed()
                             .setColor('#44DDFF')
                             .setDescription(`Current timezone is: ${server.data.timezone} (${Utility.timezoneOffsetString(date)})`);
-                        msg.channel.send(embed).catch(() => {});
+                        msg.channel.send(embed).catch(() => { });
                     } else {
                         if (!server.isAdmin(msg)) {
                             return;
@@ -181,7 +181,7 @@ export class Utility {
                             embed.setDescription(`Invalid timezone.`);
                         }
 
-                        msg.channel.send(embed).catch(() => {});
+                        msg.channel.send(embed).catch(() => { });
                     }
 
                     break;
@@ -197,10 +197,10 @@ export class Utility {
         if (timezone === null || timezone === undefined) {
             timezone = "UTC";
         }
-    
-        return new Date(new Date().toLocaleString("en-US", {timeZone: timezone}));
+
+        return new Date(new Date().toLocaleString("en-US", { timeZone: timezone }));
     }
-    
+
     /**
      * @param {String} time
      */
@@ -212,14 +212,14 @@ export class Utility {
                 m: 0,
                 s: 0
             };
-    
+
             for (let i = 0; i < symbols.length; i++) {
                 let count = time.split(symbols[i]).length - 1;
-    
+
                 if (count === 1) {
                     let index = time.indexOf(symbols[i]);
                     let s = "";
-    
+
                     for (let j = index - 1; j >= 0; j--) {
                         if (Number.isNaN(parseInt(time[j], 10))) {
                             break;
@@ -227,42 +227,42 @@ export class Utility {
                             s = time[j] + s;
                         }
                     }
-    
+
                     result[symbols[i]] = parseInt(s, 10);
                 } else if (count > 1) {
                     return false;
                 }
             }
-    
-            let ms = result.h*36e5 + result.m*6e4 + result.s*1000;
-    
+
+            let ms = result.h * 36e5 + result.m * 6e4 + result.s * 1000;
+
             if (ms > 0) {
                 return ms
             } else {
                 return false;
             }
         }
-    
+
         return false;
     }
-    
+
     /**
      * @param {Date} date
      */
     static formattedTimeString(date) {
         let hh = date.getHours();
         let mm = date.getMinutes();
-    
+
         if (hh < 10) {
             hh = `0${hh}`;
         }
         if (mm < 10) {
             mm = `0${mm}`;
         }
-    
+
         return `${hh}:${mm}`;
     }
-    
+
     /**
      * @param {Server} server
      * @param {Date} date
@@ -272,7 +272,7 @@ export class Utility {
             return;
         }
 
-        let now = new Date(new Date().toLocaleString("en-US", {timeZone: server.data.timezone}));
+        let now = new Date(new Date().toLocaleString("en-US", { timeZone: server.data.timezone }));
         let nowDay = now.getDate();
         let nowMonth = now.getMonth() + 1;
         let nowYear = now.getFullYear();
@@ -290,28 +290,28 @@ export class Utility {
                     return "Tomorrow"
             }
         }
-    
+
         if (day < 10) {
             day = `0${day}`;
-        } 
+        }
         if (month < 10) {
             month = `0${month}`;
-        } 
-        
+        }
+
         return `${day}/${month}/${year}`;
     }
-    
+
     /**
      * @param {Date} date
      */
     static timezoneOffsetString(date) {
         if (!types.isDate(date)) {
-            date = new Date(new Date().toLocaleString("en-US", {timeZone: "UTC"}));
+            date = new Date(new Date().toLocaleString("en-US", { timeZone: "UTC" }));
         }
 
-        let utc = new Date(new Date().toLocaleString("en-US", {timeZone: "UTC"}));
+        let utc = new Date(new Date().toLocaleString("en-US", { timeZone: "UTC" }));
         let offset = Math.floor((date - utc) / 36e5);
-    
+
         if (offset === 0) {
             return "UTC"
         } else {

@@ -1,4 +1,4 @@
-import * as Discord from 'discord.js';
+import Discord from 'discord.js';
 import { MESSAGE_TIMEOUT_SHORT, MESSAGE_TIMEOUT_MEDIUM } from './config';
 import { Admin } from './admin';
 import { Reminder } from './reminder';
@@ -19,7 +19,7 @@ function readSharedJSON() {
         console.log("Global data loaded.\n");
 
         return data;
-    } catch(err) {
+    } catch (err) {
         if (err.code === "ENOENT") {
             return {};
         }
@@ -32,7 +32,7 @@ function readSharedJSON() {
 let SharedData = readSharedJSON();
 
 function readSharedJSONAsync(func) {
-    fs.readFile(path.join(__dirname, "..", process.env.RESOURCE_SHARED_FOLDER, `utility.json`), (err, data) =>  {
+    fs.readFile(path.join(__dirname, "..", process.env.RESOURCE_SHARED_FOLDER, `utility.json`), (err, data) => {
         if (err && err.code !== "ENOENT") {
             console.error(err);
             process.exit(1);
@@ -44,7 +44,7 @@ function readSharedJSONAsync(func) {
         func();
     });
 
-    fs.readFile(path.join(__dirname, "..", process.env.RESOURCE_SHARED_FOLDER, `info_gck.json`), (err, data) =>  {
+    fs.readFile(path.join(__dirname, "..", process.env.RESOURCE_SHARED_FOLDER, `info_gck.json`), (err, data) => {
         if (err && err.code !== "ENOENT") {
             console.error(err);
             process.exit(1);
@@ -102,7 +102,7 @@ export class Server {
             for (let key in this.data.reminder) {
                 for (let i = 0; i < this.data.reminder[key].length; i++) {
                     let ms = this.data.reminder[key][i].scheduledTime - timestamp;
-    
+
                     if (ms >= 0) {
                         Reminder.reformReminder(this, this.data.reminder[key][i], ms);
                     } else {
@@ -120,27 +120,27 @@ export class Server {
     /** 
      * @type {Discord.Client} 
      * */
-    get client() {return this._client;}
-    
+    get client() { return this._client; }
+
     /** 
      * @type {Discord.Guild} 
      * */
-    get guild() {return this._guild;}
-    
-    /** 
-     * @type {Object} 
-     * */
-    get data() {return this._data;}
+    get guild() { return this._guild; }
 
     /** 
      * @type {Object} 
      * */
-    get memoryData() {return this._memoryData;}
+    get data() { return this._data; }
 
     /** 
      * @type {Object} 
      * */
-    static get SharedData() {return SharedData;}
+    get memoryData() { return this._memoryData; }
+
+    /** 
+     * @type {Object} 
+     * */
+    static get SharedData() { return SharedData; }
 
     /******************************************************************************************************
     * Helper
@@ -159,7 +159,7 @@ export class Server {
      * @return {Boolean}
      */
     isAdmin(msg) {
-        return msg.member.hasPermission("ADMINISTRATOR") || msg.author.id === process.env.BOT_OWNER;
+        return msg.member.hasPermission("ADMINISTRATOR") || this.isDeveloper(msg);
     }
 
     /**
@@ -185,9 +185,9 @@ export class Server {
     readJSON() {
         try {
             let data = fs.readFileSync(path.join(__dirname, "..", process.env.RESOURCE_FOLDER, `${this.guild.id}.json`));
-            
+
             return JSON.parse(data);
-        } catch(err) {
+        } catch (err) {
             if (err.code === "ENOENT") {
                 return {};
             }
@@ -201,7 +201,7 @@ export class Server {
      * @param {Function} func
      */
     readJSONAsync(func) {
-        fs.readFile(path.join(__dirname, "..", process.env.RESOURCE_FOLDER, `${this.guild.id}.json`), (err, data) =>  {
+        fs.readFile(path.join(__dirname, "..", process.env.RESOURCE_FOLDER, `${this.guild.id}.json`), (err, data) => {
             if (err && err.code !== "ENOENT") {
                 console.error(err);
                 process.exit(1);
@@ -240,11 +240,11 @@ export class Server {
 
         /** @type {String} */ let command = msg.content.split(" ");
         /** @type {Boolean} */ let deleteFlag = false;
-        
+
         // check for command prefix
         if (command[0] !== process.env.COMMAND_PREFIX) {
             return;
-        }    
+        }
 
         // developer commands
         if (command[1] === "dev" && msg.author.id === process.env.BOT_OWNER) {
@@ -257,7 +257,7 @@ export class Server {
                         const embed = new Discord.RichEmbed().setColor(`#44DDFF`)
                             .setDescription(`Successfully reloaded shared data.`);
 
-                        msg.channel.send(embed).catch(() => {})
+                        msg.channel.send(embed).catch(() => { })
                     }
                 });
             }
@@ -273,7 +273,7 @@ export class Server {
         // utility commands
         else if (this.isAdmin(msg) || this.isAllowedChannel(msg)) {
             Utility.onMessage(this, msg);
-            
+
             if (Server.SharedData.hasOwnProperty("info")) {
                 Info.onMessage(this, msg);
             }
@@ -312,12 +312,14 @@ export class Server {
                 return;
             }
 
-            this.guild.fetchMember(msg.author).then(member => {
-                msg.member = member;
-                this.onMessageFunc(msg);
-            }).catch(err => {
-                console.error(err);
-            });
+            (async () => {
+                try {
+                    msg.member = await this.guild.fetchMember(msg.author);
+                    this.onMessage(msg);
+                } catch (err) {
+                    console.error(err);
+                }
+            })();
 
             return;
         }

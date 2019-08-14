@@ -2,13 +2,26 @@ import * as Discord from 'discord.js';
 import { Server } from './server';
 
 export class Info {
+    /**
+     * @param {Server} server
+     * @param {Discord.Message} msg
+     */
     static onMessage(server, msg) {
+        let client;
+        if (server instanceof Server) {
+            client = server.client;
+        } else if (server instanceof Discord.Client) {
+            client = server;
+        } else {
+            return;
+        }
+
         let command = msg.content.split(" ");
 
         if (command.length >= 2 && command[1].toLowerCase() === "uno") {
             let arr = ["<:Jebaited:302181297349197824>", "<:RufusLaugh:443290739787563008>", "<:Mari:440765691289665537>"]
 
-            msg.channel.send(arr[Math.floor(Math.random() * arr.length)]).catch(() => {});
+            msg.channel.send(arr[Math.floor(Math.random() * arr.length)]).catch(() => { });
         }
 
         if (command.length < 3) {
@@ -74,7 +87,7 @@ export class Info {
                 if (isLB && !Server.SharedData.info.gck[hero].hasOwnProperty(lbSkill)) {
                     return;
                 }
-                
+
                 const embed = new Discord.RichEmbed().setColor(Server.SharedData.info.gck[hero].color);
 
                 if (isLB) {
@@ -91,7 +104,7 @@ export class Info {
                     } else {
                         embed.addBlankField(true)
                     }
-                    
+
                     embed.addField(`Type`, `${Server.SharedData.info.gck[hero][skill].type}\n\u200b`, true);
 
                     if (Server.SharedData.info.gck[hero][lbSkill].hasOwnProperty(`cooldown`)) {
@@ -104,7 +117,7 @@ export class Info {
                 } else {
                     embed.setThumbnail(Server.SharedData.info.gck[hero][skill].icon)
                         .addField(`Name`, `**${Server.SharedData.info.gck[hero][skill].name}**`, true)
-                        
+
                     if (Server.SharedData.info.gck[hero][skill].hasOwnProperty(`cast_time`)) {
                         embed.addField(`Cast Time`, `${Server.SharedData.info.gck[hero][skill].cast_time}s`, true)
                     } else {
@@ -131,14 +144,17 @@ export class Info {
                 }
 
                 if (translatedById === null) {
-                    msg.channel.send(embed).catch(() => {});
+                    msg.channel.send(embed).catch(() => { });
                 } else {
-                    server.client.fetchUser(translatedById).then(user => {
-                        embed.setFooter(`Translated by ${user.tag}`, user.avatarURL);
-                        msg.channel.send(embed).catch(() => {});
-                    }).catch(err => {
-                        console.error(err);
-                    })
+                    (async () => {
+                        try {
+                            const user = await client.fetchUser(translatedById);
+                            embed.setFooter(`Translated by ${user.tag}`, user.avatarURL);
+                            msg.channel.send(embed).catch(() => { });
+                        } catch (err) {
+                            console.error(err);
+                        }
+                    })();
                 }
             }
         }
