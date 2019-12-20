@@ -74,6 +74,13 @@ export class Info {
                         skill = "special";
                         break;
                     }
+                    case "chaser":
+                    case "cha":
+                    case "chaser_skill":
+                    case "cs": {
+                        skill = "chaser";
+                        break;
+                    }
                     default: {
                         return;
                     }
@@ -96,13 +103,13 @@ export class Info {
                     if (Server.SharedData.info.gck[hero][lbSkill].hasOwnProperty(`name`)) {
                         embed.addField(`Name`, `**[Enhanced] ${Server.SharedData.info.gck[hero][lbSkill].name}**`, true);
                     } else {
-                        embed.addField(`Name`, `**[Enhanced] ${Server.SharedData.info.gck[hero][skill].name}**`, true)
+                        embed.addField(`Name`, `**[Enhanced] ${Server.SharedData.info.gck[hero][skill].name}**`, true);
                     }
 
                     if (Server.SharedData.info.gck[hero][skill].hasOwnProperty(`cast_time`)) {
-                        embed.addField(`Cast Time`, `${Server.SharedData.info.gck[hero][skill].cast_time}s`, true)
+                        embed.addField(`Cast Time`, `${Server.SharedData.info.gck[hero][skill].cast_time}s`, true);
                     } else {
-                        embed.addBlankField(true)
+                        embed.addBlankField(true);
                     }
 
                     embed.addField(`Type`, `${Server.SharedData.info.gck[hero][skill].type}\n\u200b`, true);
@@ -116,12 +123,12 @@ export class Info {
                     embed.addField(`Description`, Server.SharedData.info.gck[hero][lbSkill].description);
                 } else {
                     embed.setThumbnail(Server.SharedData.info.gck[hero][skill].icon)
-                        .addField(`Name`, `**${Server.SharedData.info.gck[hero][skill].name}**`, true)
+                        .addField(`Name`, `**${Server.SharedData.info.gck[hero][skill].name}**`, true);
 
                     if (Server.SharedData.info.gck[hero][skill].hasOwnProperty(`cast_time`)) {
-                        embed.addField(`Cast Time`, `${Server.SharedData.info.gck[hero][skill].cast_time}s`, true)
+                        embed.addField(`Cast Time`, `${Server.SharedData.info.gck[hero][skill].cast_time}s`, true);
                     } else {
-                        embed.addBlankField(true)
+                        embed.addBlankField(true);
                     }
 
                     embed.addField(`Type`, `${Server.SharedData.info.gck[hero][skill].type}\n\u200b`, true);
@@ -130,7 +137,13 @@ export class Info {
                         embed.addField(`Cooldown`, `${Server.SharedData.info.gck[hero][skill].cooldown}s`, true);
                     }
 
-                    embed.addField(`Description`, Server.SharedData.info.gck[hero][skill].description);
+                    if (skill === "chaser") {
+                        embed.addField(`Description`, `${Server.SharedData.info.gck[hero][skill].description}\n\u200b`);
+                        embed.addField(`L-Upgrade`, `${Server.SharedData.info.gck[hero][skill]["upgrade-l"]}\n\u200b`);
+                        embed.addField(`R-Upgrade`, Server.SharedData.info.gck[hero][skill]["upgrade-r"]);
+                    } else {
+                        embed.addField(`Description`, Server.SharedData.info.gck[hero][skill].description);
+                    }
                 }
 
                 let translatedById = null;

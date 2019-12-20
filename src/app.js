@@ -48,13 +48,19 @@ let ServerMap = new Map();
 client.on("ready", () => {
     console.log(`Logged in as ${client.user.tag}\n`);
 
-    console.log("Reading and loading data..");
-    for (let guild of client.guilds.array()) {
-        ServerMap.set(guild, new Server(client, guild));
-    }
-    console.log("All data loaded.\n");
-
     client.user.setActivity("Fuee~");
+
+    console.log("Reading and loading data..");
+    (async () => {
+        let awaits = [];
+        for (let guild of client.guilds.array()) {
+            awaits.push(await ServerMap.set(guild, new Server(client, guild)));
+        }
+
+        Promise.all(awaits).then(() => {
+            console.log("All data loaded.\n");
+        });
+    })();
 });
 
 // message by any user
@@ -86,5 +92,16 @@ client.on("guildCreate", guild => {
     }
 });
 
-//client.login(process.env.BOT_TOKEN_DEV);
-client.login(process.env.BOT_TOKEN);
+// leaves a guild
+client.on("guildDelete", guild => {
+    // delete server data
+    if (ServerMap.has(guild)) {
+        ServerMap.delete(guild);
+        console.log(`Left: ${this.guild.name} (${this.guild.id})`);
+    }
+});
+
+client.login(process.env.BOT_TOKEN_DEV).catch(() => {
+    
+});
+//client.login(process.env.BOT_TOKEN);

@@ -1,6 +1,10 @@
 import * as Discord from 'discord.js';
 import { Server } from './server';
 import { types } from 'util';
+import { create, all } from 'mathjs';
+
+const math = create(all);
+math.import(require('mathjs-simple-integral'));
 
 const Emojis = {
     1: "1⃣",
@@ -145,6 +149,34 @@ export class Utility {
                     }
 
                     break;
+                case "math": {
+                    if (command.length < 3) {
+                        return;
+                    }
+
+                    // integration
+                    if (command[2].startsWith("int(") && command[2].endsWith(")")) {
+                        console.log(math.integral("x^2"));
+                    } else {
+
+                    }
+
+                    try {
+                        let exp = command.slice(2, command.length).join(" ");
+                        const result = math.evaluate(exp);
+                        exp = exp.replace(/\*/g, "\\*");
+
+                        const embed = new Discord.RichEmbed()
+                            .setColor('#44DDFF')
+                            .setAuthor("Fueelator", "https://i.imgur.com/xpBveJX.png")
+                            .setDescription(`${exp} = **${result}**`);
+                        msg.channel.send(embed).catch(() => { });
+                    } catch (err) {
+                        // expression error
+                    }
+
+                    break;
+                }
                 case "time": {
                     if (command.length === 2) {
                         let date = Utility.currentDateTime(server.data.timezone);
