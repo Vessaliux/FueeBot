@@ -13,7 +13,7 @@
     "discord.js": "^11.5.0",
     "dotenv": "^8.0.0",
     "esm": "^3.2.25",
-    "jquery": "^3.4.1",
+    "jquery": "^3.5.0",
     "mathjs": "^6.2.1",
     "mathjs-simple-integral": "^0.1.1"
   }
